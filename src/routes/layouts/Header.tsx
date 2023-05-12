@@ -1,9 +1,8 @@
-import { IconButton, useTheme } from "@mui/material";
+import { IconButton, darken, lighten, useTheme } from "@mui/material";
+import { FiPower } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../../shared/store/store";
-import { darken, lighten } from "@mui/material";
-import { FiUser, FiPower } from "react-icons/fi";
 import { logOut } from "../../shared/store/modules/auth/authSlice";
+import { AppDispatch, RootState } from "../../shared/store/store";
 
 interface GradientGeneratorConfig {
   lightCoefficient?: number;

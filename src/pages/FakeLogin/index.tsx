@@ -22,7 +22,7 @@ export const FakeLogin: React.FC = () => {
 
   return (
     <main
-      className="w-screen h-screen text-white flex justify-between items-center p-16 pl-20 overflow-hidden flex-col lg:flex-row gap-5"
+      className="w-screen h-screen text-white flex justify-between items-center p-16 px-20 xl:px-36 overflow-hidden flex-col lg:flex-row gap-5"
       style={{
         background: generateGradient(theme.palette.primary.main, {
           darkCoefficient: 0.3,
@@ -33,7 +33,7 @@ export const FakeLogin: React.FC = () => {
       <DocSvg className="max-w-lg flex" />
 
       <div className="bg-white rounded-xl shadow-xl flex p-8 gap-5 flex-col items-center min-w-[300px]">
-        <span className="text-2xl text-primary">
+        <span className="text-4xl text-primary">
           <strong>Lattes</strong>Ucs
         </span>
 
@@ -44,7 +44,7 @@ export const FakeLogin: React.FC = () => {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <Button variant="contained" onClick={handleEnter}>
+        <Button variant="contained" onClick={handleEnter} className="text-xl">
           Entrar
         </Button>
       </div>
