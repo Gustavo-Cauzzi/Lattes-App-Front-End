@@ -1,10 +1,5 @@
 import { PropsWithChildren } from "react";
-import {
-  darken,
-  ThemeProvider,
-  StyledEngineProvider,
-  useTheme,
-} from "@mui/material";
+import { darken, ThemeProvider, StyledEngineProvider, useTheme } from "@mui/material";
 import { theme } from "../../Theme";
 
 const getHexToRgb = (hex: string) => {
@@ -42,12 +37,5 @@ const TailwindColorChanger = () => {
   const [r, g, b] = getHexToRgb(mainColor);
   const [rd, gd, bd] = getRgbVariablesFromString(darken(mainColor, 0.3));
 
-  console.log("rd, gd, bd: ", rd, gd, bd, mainColor, darken(mainColor, 0.3));
-
-  return (
-    <style>
-      :root{" "}
-      {`{--color-primary: ${r}, ${g}, ${b}; --color-primary-dark: ${rd}, ${gd}, ${bd};}`}
-    </style>
-  );
+  return <style>:root {`{--color-primary: ${r}, ${g}, ${b}; --color-primary-dark: ${rd}, ${gd}, ${bd};}`}</style>;
 };
