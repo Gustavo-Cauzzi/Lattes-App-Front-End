@@ -1,0 +1,37 @@
+# EditorConfig helps developers define and maintain consistent
+# coding styles between different editors and IDEs
+# editorconfig.org
+
+root = true
+
+[*]
+
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{tsx,jsx,css,scss,html}]
+indent_size = 2
+
+
+# Idea guides
+ij_visual_guides = 80,120
+ij_wrap_on_typing = true
+ij_java_generate_final_parameters = true
+ij_java_binary_operation_wrap = normal
+ij_java_method_parameters_wrap = normal
+ij_java_assignment_wrap = normal
+ij_java_call_parameters_wrap = normal
+ij_formatter_tags_enabled = true
+
+[*.java]
+indent_style = tab
+
