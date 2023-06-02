@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 .MuiButtonBase-root.MuiButton-root.MuiButton-contained.MuiButton-containedPrimary {
-  @apply bg-primary;
+  &:not(.Mui-disabled) {
+    @apply bg-primary;
+  }
   &:hover {
     @apply bg-primary-dark;
   }
@@ -20,4 +22,8 @@ span,
 small,
 strong {
   font-family: "Roboto", sans-serif;
+}
+
+body {
+  background: #fafafa;
 }

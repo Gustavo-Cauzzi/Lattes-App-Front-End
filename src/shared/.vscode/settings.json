@@ -1,0 +1,11 @@
+{
+    "workbench.colorCustomizations": {
+        "editorBracketHighlight.foreground3": "#28cdff",
+        "editorBracketHighlight.unexpectedBracket.foreground": "#db6165",
+        "editorBracketHighlight.foreground1": "#ffd700",
+        "editorBracketHighlight.foreground2": "#da70d6",
+        "activityBar.background": "#232F35",
+        "titleBar.activeBackground": "#31424A",
+        "titleBar.activeForeground": "#FAFBFC"
+    }
+}

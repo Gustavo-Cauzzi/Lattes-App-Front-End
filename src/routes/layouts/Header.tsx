@@ -3,23 +3,26 @@ import { FiPower } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { logOut } from "../../shared/store/modules/auth/authSlice";
 import { AppDispatch, RootState } from "../../shared/store/store";
+import { useNavigate } from "react-router-dom";
 
 interface GradientGeneratorConfig {
   lightCoefficient?: number;
   darkCoefficient?: number;
+  degrees?: number;
 }
 
 export const generateGradient = (
   color: string,
-  { darkCoefficient, lightCoefficient } = {} as GradientGeneratorConfig
+  { darkCoefficient, lightCoefficient, degrees } = {} as GradientGeneratorConfig
 ) =>
-  `linear-gradient(109.6deg, ${lighten(color, lightCoefficient ?? 0.1)} 11.2%, ${darken(
+  `linear-gradient(${degrees ?? "109.6"}deg, ${lighten(color, lightCoefficient ?? 0.1)} 11.2%, ${darken(
     color,
     darkCoefficient ?? 0.2
   )} 91.1%)`;
 
 export const Header = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
 
   const name = useSelector<RootState, string | undefined>((state) => state.auth.user?.name);
@@ -29,30 +32,35 @@ export const Header = () => {
   };
 
   return (
-    <div
-      className="sticky w-full flex justify-between p-6 items-center shadow-xl text-white"
-      style={{
-        background: generateGradient(theme.palette.primary.main),
-      }}
-    >
-      <strong className="text-2xl text-white">Lattes Ucs</strong>
+    <>
+      <div
+        className="z-[1000] fixed w-full flex justify-between p-6 items-center shadow-xl text-white h-[5.62rem]"
+        style={{
+          background: generateGradient(theme.palette.primary.main),
+        }}
+      >
+        <strong className="text-2xl text-white cursor-pointer" onClick={() => navigate("/")}>
+          Lattes Ucs
+        </strong>
 
-      <div className="flex gap-2">
-        {name ? (
-          <>
-            <div className="flex gap-2 items-center">
-              {/* <FiUser size={25} /> */}
-              <span>{name}</span>
-            </div>
-          </>
-        ) : (
-          <></>
-        )}
+        <div className="flex gap-2">
+          {name ? (
+            <>
+              <div className="flex gap-2 items-center">
+                {/* <FiUser size={25} /> */}
+                <span>{name}</span>
+              </div>
+            </>
+          ) : (
+            <></>
+          )}
 
-        <IconButton onClick={handleLogout}>
-          <FiPower size={25} color="#fff" />
-        </IconButton>
+          <IconButton onClick={handleLogout}>
+            <FiPower size={25} color="#fff" />
+          </IconButton>
+        </div>
       </div>
-    </div>
+      <div className="h-[5.62rem] header-overlay"></div>
+    </>
   );
 };
