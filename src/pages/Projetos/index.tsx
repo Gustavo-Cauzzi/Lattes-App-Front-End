@@ -30,7 +30,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { FiCheck, FiPlus, FiX } from "react-icons/fi";
+import { FiCheck, FiPlus, FiSave, FiX } from "react-icons/fi";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { object, string } from "yup";
@@ -67,7 +67,7 @@ export const Projetos: React.FC = () => {
   });
 
   useEffect(() => {
-    const toastId = toast.loading("Buscando pessoas...");
+    const toastId = toast.loading("Buscando projetos...");
     dispatch(findAllProjects())
       .unwrap()
       .catch(() => toast.error("Não foi possível buscar os dados"))
@@ -91,12 +91,6 @@ export const Projetos: React.FC = () => {
             <AccordionSummary expandIcon={<GridExpandMoreIcon />}>
               <div className="flex items-center justify-between gap-4 w-full">
                 <span className="text-xl text-primary">Filtros</span>
-
-                {/* <div className="flex gap-2">
-                  {Object.entries(filters).map(([key, value]) =>
-                    value ? <Badge key={key} badgeContent={`${key}: ${value}`} /> : <Fragment key={key}></Fragment>
-                  )}
-                </div> */}
               </div>
             </AccordionSummary>
             <AccordionDetails className="flex flex-col gap-4">
@@ -342,6 +336,7 @@ const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, ...props
       setPeople([]);
       return;
     }
+    console.log("project: ", project);
     setPeople(project.persons ?? []);
     reset({
       description: project.description ?? "",
@@ -380,7 +375,7 @@ const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, ...props
         <DialogTitle className="text-primary">{project ? "Editar" : "Adicionar"} Projeto</DialogTitle>
         <DialogContent>
           <form
-            id="pessoasForm"
+            id="projectsForm"
             onSubmit={handleSubmit(handleSavePessoa)}
             className="flex flex-col w-full justify-center gap-4 py-4"
           >
@@ -526,10 +521,10 @@ const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, ...props
           />
         </DialogContent>
         <DialogActions>
-          <Button color="primary" variant="outlined" onClick={handleClose}>
+          <Button startIcon={<FiX />} color="primary" variant="outlined" onClick={handleClose}>
             Cancelar
           </Button>
-          <Button color="primary" variant="contained" type="submit" form="pessoasForm">
+          <Button startIcon={<FiSave />} color="primary" variant="contained" type="submit" form="projectsForm">
             Salvar
           </Button>
         </DialogActions>

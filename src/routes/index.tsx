@@ -5,6 +5,7 @@ import { BaseLayout } from "./layouts/BaseLayout";
 import { AppTheme } from "./layers/AppTheme";
 import { Pessoas } from "../pages/Pessoas";
 import { Projetos } from "../pages/Projetos";
+import { Results } from "../pages/Results";
 
 export const AppRoutes = () => (
   <AppTheme>
@@ -13,8 +14,9 @@ export const AppRoutes = () => (
         <Routes>
           <Route path="/" element={<BaseLayout />}>
             <Route path="/" element={<Home />} />
-            <Route path="/Person" element={<Pessoas />} />
+            <Route path="/person" element={<Pessoas />} />
             <Route path="/projects" element={<Projetos />} />
+            <Route path="/results" element={<Results />} />
           </Route>
         </Routes>
       </Auth>

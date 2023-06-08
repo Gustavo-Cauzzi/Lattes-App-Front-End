@@ -5,7 +5,7 @@ const menus = [
   {
     title: "Pessoas",
     icon: FiUser,
-    goTo: "/Person",
+    goTo: "/person",
   },
   {
     title: "Projetos",
@@ -15,7 +15,7 @@ const menus = [
   {
     title: "Resultados",
     icon: FiPackage,
-    goTo: "/Person",
+    goTo: "/results",
   },
 ];
 

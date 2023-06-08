@@ -4,8 +4,6 @@ import { Project } from "./Project";
 export interface Result {
     id: number;
     description: string;
-    project?: Project;
+    project: Project;
     persons?: Person[];
-    created_at: Date;
-    updated_at: Date;
 }
