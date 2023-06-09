@@ -168,7 +168,7 @@ export const Projetos: React.FC = () => {
     const plural = rowSelectionModel.length > 1 ? "s" : "";
     const projectsToDelete = projects.filter((project) => rowSelectionModel.includes(project.id));
     const deleteChildrenMsg = projectsToDelete.find((project) => project.persons?.length || project.results.length)
-      ? " Um ou mais projetos possuem resultados ou pessoas cadastradas. A exclusão irá deletar todos os registros filhos!!"
+      ? " Um ou mais projetos possuem resultados ou pessoas cadastradas. A exclusão irá deletar todos os registros filhos!"
       : "";
 
     if (
@@ -209,6 +209,7 @@ export const Projetos: React.FC = () => {
       setRowSelectionModel([]);
     }
     toast.dismiss(toastProjectDeletionId);
+    toast("(Não implmentado)");
   };
 
   return (
