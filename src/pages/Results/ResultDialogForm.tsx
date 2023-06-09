@@ -80,12 +80,13 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
     }
 
     const getData = async () => {
-      setPeople(result.persons);
+      setPeople(result.persons ?? []);
       reset({
         description: result.description,
         project: result.project,
       });
       setIsProjectPeopleLoading(true);
+      // Get all people in project which is not present in `result`
       const { data: projectData } = await api.get<Project>(`/projects/${result.project.id}`);
       setValue("project", {
         id: projectData.id,
@@ -99,7 +100,6 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
   }, [result]);
 
   useEffect(() => {
-    console.log("fixedProject: ", fixedProject);
     if (fixedProject) setValue("project", fixedProject);
   }, [fixedProject]);
 
@@ -253,7 +253,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
                     onChange={(_e, newValue) => setPersonToAdd(newValue)}
                     fullWidth
                     className={`smmd:min-w-[10rem] ${
-                      isAddPersonMode ? "" : "hidden xssm:block mr-[-10rem]"
+                      isAddPersonMode ? "" : "hidden smmd:block mr-[-10rem]"
                     } transition-all`}
                     options={
                       wProject?.persons?.filter(

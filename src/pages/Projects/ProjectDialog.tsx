@@ -291,34 +291,38 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
               <Tab label="Resultados" />
             </Tabs>
             <TabPanel value={currentOpenTab} index={0}>
-              <div className="flex w-full gap-4 justify-between items-center">
+              <div className="flex w-full gap-4 justify-between items-center flex-col xs:flex-row">
                 <h2 className="text-primary text-xl whitespace-nowrap">Pessoas do projeto</h2>
 
-                <div className="pt-2 flex gap-2 w-full max-w-sm justify-end overflow-hidden">
-                  {isAddPersonMode ? (
-                    <Button startIcon={<FiX />} onClick={handleResetAddPersonMode}>
-                      Cancelar
+                <div className="pt-2 flex gap-2 w-fit max-w-sm justify-end overflow-hidden flex-col smmd:flex-row">
+                  <div className="flex gap-2 justify-between items-center">
+                    {isAddPersonMode ? (
+                      <Button startIcon={<FiX />} onClick={handleResetAddPersonMode}>
+                        Cancelar
+                      </Button>
+                    ) : (
+                      // <Button startIcon={<FiTrash2 />} onClick={handleRemovePeople} disabled={!selectedPeopleIds.length}>
+                      //   Remover
+                      // </Button>
+                      <></>
+                    )}
+                    <Button
+                      onClick={handleAddClick}
+                      disabled={isAddPersonMode && !personToAdd}
+                      startIcon={isAddPersonMode ? <FiCheck /> : <FiPlus />}
+                      variant={isAddPersonMode ? "contained" : "text"}
+                    >
+                      Adicionar
                     </Button>
-                  ) : (
-                    // <Button startIcon={<FiTrash2 />} onClick={handleRemovePeople} disabled={!selectedPeopleIds.length}>
-                    //   Remover
-                    // </Button>
-                    <></>
-                  )}
-                  <Button
-                    onClick={handleAddClick}
-                    disabled={isAddPersonMode && !personToAdd}
-                    startIcon={isAddPersonMode ? <FiCheck /> : <FiPlus />}
-                    variant={isAddPersonMode ? "contained" : "text"}
-                  >
-                    Adicionar
-                  </Button>
+                  </div>
 
                   <Autocomplete
                     value={personToAdd}
                     onChange={(_e, newValue) => setPersonToAdd(newValue)}
                     fullWidth
-                    className={`max-w-[10rem] ${isAddPersonMode ? "" : "mr-[-10rem]"} transition-all`}
+                    className={`smmd:min-w-[10rem] ${
+                      isAddPersonMode ? "" : "hidden smmd:block mr-[-10rem]"
+                    } transition-all`}
                     options={
                       peopleAutocompleteData?.filter(
                         (personOption) => !people?.find((person) => person.id === personOption.id)
