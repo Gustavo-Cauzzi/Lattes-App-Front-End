@@ -80,6 +80,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
     }
 
     const getData = async () => {
+      setPeople(result.persons);
       reset({
         description: result.description,
         project: result.project,

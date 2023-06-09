@@ -213,6 +213,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                     {...field}
                     fullWidth
                     multiline
+                    className="max-w-5xl"
                     size="small"
                     minRows={4}
                     maxRows={9}
