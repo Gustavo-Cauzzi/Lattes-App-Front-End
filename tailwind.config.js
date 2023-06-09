@@ -8,6 +8,7 @@ export default {
             colors: {
                 primary: "rgb(var(--color-primary))",
                 "primary-dark": "rgb(var(--color-primary-dark))",
+                error: "#D32F2F",
             },
         },
         screens: {

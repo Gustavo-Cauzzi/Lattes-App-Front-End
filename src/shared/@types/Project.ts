@@ -11,8 +11,8 @@ export interface Project {
 
     persons?: (Person & { role: Roles })[];
     results: Result[];
-    startDate?: Date;
-    finishDate?: Date;
+    startDate: Date | null;
+    finishDate: Date | null;
     isFinished: boolean;
     created_at: Date;
     updated_at: Date;

@@ -43,17 +43,8 @@ export const Header = () => {
           <FiBook size={29} /> Lattes Ucs
         </strong>
 
-        <div className="flex gap-2">
-          {name ? (
-            <>
-              <div className="flex gap-2 items-center">
-                {/* <FiUser size={25} /> */}
-                <span>{name}</span>
-              </div>
-            </>
-          ) : (
-            <></>
-          )}
+        <div className="flex gap-2 items-center">
+          {name && <span>{name}</span>}
 
           <IconButton onClick={handleLogout}>
             <FiPower size={25} color="#fff" />

@@ -1,6 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Button, TextField } from "@mui/material";
 import { DataGrid, GridExpandMoreIcon, GridRenderCellParams } from "@mui/x-data-grid";
-import { SyntheticEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiPlus } from "react-icons/fi";
 import { useQuery } from "react-query";
@@ -40,11 +40,6 @@ export const Results: React.FC = () => {
     setFilters((state) => ({ ...state, [field]: value }));
   };
 
-  const handleUpdateStatus = (event: SyntheticEvent, id: Result["id"]) => {
-    event.stopPropagation();
-    // dispatch(changeResultStatus(id));
-  };
-
   return (
     <>
       <div className="w-full flex justify-center">
@@ -68,7 +63,7 @@ export const Results: React.FC = () => {
                   value={filters.project}
                   onChange={(_e, newValue) => updateFilter("project", newValue)}
                   renderInput={(params) => <TextField {...params} label="Projeto" />}
-                  getOptionLabel={(project) => project.description ?? "Não identificado"}
+                  getOptionLabel={(project) => project.title ?? "Não identificado"}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
                 />
               </div>
@@ -95,9 +90,9 @@ export const Results: React.FC = () => {
               {
                 field: "project",
                 headerName: "Projeto",
-                flex: 1,
+                flex: 0.7,
                 valueGetter: (p: GridRenderCellParams<Result, Project | undefined>) =>
-                  p.value?.description ?? "Não reconhecido",
+                  p.value?.title ?? "Não reconhecido",
               },
             ]}
           />

@@ -1,6 +1,7 @@
 import {
   Autocomplete,
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -22,12 +23,15 @@ import { api } from "../../shared/services/api";
 import { toast } from "react-hot-toast";
 import { Project } from "../../shared/@types/Project";
 import { useDispatch } from "react-redux";
-import { saveResult } from "../../shared/store/modules/cruds/resultSlice";
+import { BaseResultToSave, saveResult } from "../../shared/store/modules/cruds/resultSlice";
 import { AppDispatch } from "../../shared/store/store";
 import { confirmationToast } from "../../shared/utils/Utils";
 
+type ProjectOption = Pick<Project, "id" | "title"> & { persons: Person[] };
 interface ResultDialogFormProps extends DialogProps {
   result?: Result;
+  fixedProject?: ProjectOption;
+  onSave?: (result: BaseResultToSave) => Promise<void | boolean>;
 }
 
 const schema = object({
@@ -37,7 +41,7 @@ const schema = object({
 
 interface DefaultValues {
   description: string;
-  project: null | Project;
+  project: null | ProjectOption;
 }
 
 const defaultValues: DefaultValues = {
@@ -45,11 +49,12 @@ const defaultValues: DefaultValues = {
   project: null,
 };
 
-export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClose, result }) => {
+export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClose, result, fixedProject, onSave }) => {
   const dispatch: AppDispatch = useDispatch();
   const [people, setPeople] = useState<Person[]>([]);
   const [personToAdd, setPersonToAdd] = useState<Person | null>(null);
   const [isAddPersonMode, setIsAddPersonMode] = useState(false);
+  const [isProjectPeopleLoading, setIsProjectPeopleLoading] = useState(false);
   const { data: projectsAutocompleteData } = useQuery("project", async () => {
     const { data } = await api.get<Project[]>("/projects");
     return data;
@@ -59,6 +64,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
     control,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm({
     defaultValues,
@@ -73,14 +79,33 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
       return;
     }
 
-    reset({
-      description: result.description,
-      project: result.project,
-    });
+    const getData = async () => {
+      reset({
+        description: result.description,
+        project: result.project,
+      });
+      setIsProjectPeopleLoading(true);
+      const { data: projectData } = await api.get<Project>(`/projects/${result.project.id}`);
+      setValue("project", {
+        id: projectData.id,
+        persons: projectData.persons ?? [],
+        title: projectData.title,
+      });
+      setIsProjectPeopleLoading(false);
+    };
+
+    getData();
   }, [result]);
+
+  useEffect(() => {
+    console.log("fixedProject: ", fixedProject);
+    if (fixedProject) setValue("project", fixedProject);
+  }, [fixedProject]);
 
   const handleClose = () => {
     onClose && onClose({} as SyntheticEvent, "escapeKeyDown");
+    setIsAddPersonMode(false);
+    setPersonToAdd(null);
     reset(defaultValues);
   };
 
@@ -95,19 +120,26 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
     ) {
       return;
     }
-    const toastId = toast.loading("Carregando dados ");
-    const dispatchResult = await dispatch(
-      saveResult({ persons: people, description: data.description, id: result?.id, project: data.project })
-    );
 
-    if (saveResult.rejected.match(dispatchResult)) {
-      toast.error("Não foi possível salvar o registro");
+    const resultToSave = { persons: people, description: data.description, id: result?.id, projectId: data.project.id };
+    if (onSave) {
+      const valid = await onSave(resultToSave);
+      if (valid === undefined || valid) {
+        handleClose();
+      }
     } else {
-      toast.success("Registro salvo com sucesso!");
-      handleClose();
-    }
+      const toastId = toast.loading("Carregando dados ");
+      const dispatchResult = await dispatch(saveResult(resultToSave));
 
-    toast.dismiss(toastId);
+      if (saveResult.rejected.match(dispatchResult)) {
+        toast.error("Não foi possível salvar o registro");
+      } else {
+        toast.success("Registro salvo com sucesso!");
+        handleClose();
+      }
+
+      toast.dismiss(toastId);
+    }
   };
 
   const handleResetAddPersonMode = () => {
@@ -131,6 +163,8 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
     setPersonToAdd(null);
     setIsAddPersonMode(false);
   };
+
+  const withFixedProject = <T extends any>(arr: T[]) => (fixedProject ? [fixedProject, ...arr] : arr);
 
   return (
     <Dialog open={open} maxWidth="md" fullWidth onClose={handleClose}>
@@ -158,7 +192,8 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
                 name="project"
                 render={({ field }) => (
                   <Autocomplete
-                    options={projectsAutocompleteData ?? []}
+                    disabled={!!fixedProject}
+                    options={withFixedProject(projectsAutocompleteData ?? [])}
                     value={field.value}
                     fullWidth
                     className="xssm:max-w-xs"
@@ -202,11 +237,11 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
                       <div>
                         <Button
                           onClick={handleAddClick}
-                          disabled={!wProject || (isAddPersonMode && !personToAdd)}
+                          disabled={!wProject || (isAddPersonMode && !personToAdd) || isProjectPeopleLoading}
                           startIcon={isAddPersonMode ? <FiCheck /> : <FiPlus />}
                           variant={isAddPersonMode ? "contained" : "text"}
                         >
-                          Adicionar
+                          {isProjectPeopleLoading ? <CircularProgress size="small" /> : "Adicionar"}
                         </Button>
                       </div>
                     </Tooltip>
