@@ -1,16 +1,16 @@
 import { Button } from "@mui/material";
-import { DataGrid, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { FiPlus } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
 import { Person } from "../../shared/@types/Person";
 import { Result } from "../../shared/@types/Result";
-import { LightTooltip } from "../../shared/components/MuiUtils/LightTooltip";
-import { BaseResultToSave } from "../../shared/store/modules/cruds/resultSlice";
-import { ResultDialogForm } from "../Results/ResultDialogForm";
-import { AppDispatch, RootState } from "../../shared/store/store";
-import { useDispatch, useSelector } from "react-redux";
-import { addResultToSave } from "../../shared/store/modules/cruds/projectsSlice";
+import { ListCellRender } from "../../shared/components/ListCellRender";
 import { api } from "../../shared/services/api";
+import { addResultToSave } from "../../shared/store/modules/cruds/projectsSlice";
+import { BaseResultToSave } from "../../shared/store/modules/cruds/resultSlice";
+import { AppDispatch, RootState } from "../../shared/store/store";
+import { ResultDialogForm } from "../Results/ResultDialogForm";
 
 interface ProjectResultsTabProps {
   project: {
@@ -18,13 +18,27 @@ interface ProjectResultsTabProps {
     title?: string;
     people: Person[];
   };
+  disabledAdd?: boolean;
 }
 
 type SimpleResult = Omit<Result, "project">;
 
+const columns: GridColDef[] = [
+  { field: "id", headerName: "ID", flex: 0.3 },
+  { field: "description", headerName: "Descrição", flex: 1 },
+  {
+    field: "persons",
+    headerName: "Pessoas",
+    flex: 1,
+    renderCell: (p: GridRenderCellParams<SimpleResult, Person[]>) => (
+      <ListCellRender feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
+    ),
+  },
+];
+
 let negativeIncremental = -1;
 
-export const ProjectResultsTab: React.FC<ProjectResultsTabProps> = ({ project }) => {
+export const ProjectResultsTab: React.FC<ProjectResultsTabProps> = ({ project, disabledAdd }) => {
   const dispatch: AppDispatch = useDispatch();
   const [results, setResults] = useState<SimpleResult[]>([]);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
@@ -77,7 +91,12 @@ export const ProjectResultsTab: React.FC<ProjectResultsTabProps> = ({ project })
         <h2 className="text-primary text-xl whitespace-nowrap">Resultados do projeto</h2>
 
         <div className="pt-2 flex gap-2 w-full max-w-sm justify-end overflow-hidden">
-          <Button onClick={() => setResultsDialogFormOpen(true)} startIcon={<FiPlus />} variant="text">
+          <Button
+            onClick={() => setResultsDialogFormOpen(true)}
+            startIcon={<FiPlus />}
+            variant="text"
+            disabled={disabledAdd}
+          >
             Adicionar
           </Button>
         </div>
@@ -86,34 +105,7 @@ export const ProjectResultsTab: React.FC<ProjectResultsTabProps> = ({ project })
       <DataGrid
         loading={isLoading}
         rows={results}
-        columns={[
-          { field: "id", headerName: "ID", flex: 0.3 },
-          { field: "description", headerName: "Descrição", flex: 1 },
-          {
-            field: "persons",
-            headerName: "Pessoas",
-            flex: 1,
-            renderCell: (p: GridRenderCellParams<SimpleResult, Person[]>) => (
-              <LightTooltip
-                title={
-                  <div className="flex flex-col gap-2 p-2">
-                    {!p.row.persons || p.row.persons.length === 0 ? (
-                      <span className="text-lg">Nenhuma pessoa no projeto</span>
-                    ) : (
-                      p.row.persons.map((person) => (
-                        <span className="text-lg" key={person.id}>
-                          {person.name}
-                        </span>
-                      ))
-                    )}
-                  </div>
-                }
-              >
-                <span>{p.row.persons?.length ?? 0}</span>
-              </LightTooltip>
-            ),
-          },
-        ]}
+        columns={columns}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
       />

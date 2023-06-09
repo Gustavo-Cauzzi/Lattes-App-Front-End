@@ -9,6 +9,7 @@ export default {
                 primary: "rgb(var(--color-primary))",
                 "primary-dark": "rgb(var(--color-primary-dark))",
                 error: "#D32F2F",
+                warning: "#FFCC00",
             },
         },
         screens: {

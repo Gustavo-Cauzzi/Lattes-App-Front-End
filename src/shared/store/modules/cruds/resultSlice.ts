@@ -8,6 +8,11 @@ export const findAllResults = createAsyncThunk("app/results/findAllResults", asy
     return response.data;
 });
 
+export const deleteResultsById = createAsyncThunk("app/results/deleteResultsById", async (ids: Result["id"][]) => {
+    // TODO: Deletar os resutlados
+    console.log("deleteResultsById: ", ids);
+});
+
 export type BaseResultToSave = Omit<Result, "id" | "project"> & { id?: Result["id"]; projectId: Project["id"] };
 export const saveResult = createAsyncThunk("app/result/saveResult", async (payload: BaseResultToSave, { dispatch }) => {
     if (payload.id) {

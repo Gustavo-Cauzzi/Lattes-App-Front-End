@@ -14,13 +14,12 @@ interface AddPersonParams {
     id?: number;
 }
 
-export const savePerson = createAsyncThunk("app/person/addPerson", async (payload: AddPersonParams) => {
-    const response = await api.post<Person>("/persons", {
-        id: payload.id,
-        created_at: new Date(),
-        updated_at: new Date(),
-        ...payload,
-    });
+export const savePerson = createAsyncThunk("app/person/savePerson", async (payload: AddPersonParams) => {
+    if (payload.id) {
+        const response = await api.put<Person>(`/persons/${payload.id}`, payload);
+        return response.data;
+    }
+    const response = await api.post<Person>("/persons", payload);
     return response.data;
 });
 

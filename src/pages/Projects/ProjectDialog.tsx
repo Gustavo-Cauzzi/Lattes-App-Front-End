@@ -14,11 +14,12 @@ import {
 } from "@mui/material";
 import { DataGrid, GridPaginationModel, GridRenderCellParams } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
+import { isRejectedWithValue } from "@reduxjs/toolkit";
 import { format } from "date-fns";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { FiCheck, FiPlus, FiSave, FiX } from "react-icons/fi";
+import { FiCheck, FiChevronsLeft, FiPlus, FiSave, FiX } from "react-icons/fi";
 import { useQuery } from "react-query";
 import { useDispatch } from "react-redux";
 import { date, object, ref, string } from "yup";
@@ -27,11 +28,10 @@ import { Project, Roles } from "../../shared/@types/Project";
 import { Result } from "../../shared/@types/Result";
 import { TabPanel } from "../../shared/components/MuiUtils/TabPanel";
 import { api } from "../../shared/services/api";
-import { saveProject } from "../../shared/store/modules/cruds/projectsSlice";
+import { resetResulstToSave, saveProject } from "../../shared/store/modules/cruds/projectsSlice";
 import { AppDispatch } from "../../shared/store/store";
 import { IfPresent, isTruthy } from "../../shared/utils/Utils";
 import { ProjectResultsTab } from "./ProjectResultsTab";
-import { isRejectedWithValue } from "@reduxjs/toolkit";
 
 interface DefaultValues {
   description: string;
@@ -100,6 +100,12 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
 
   const handleSave = async (data: DefaultValues) => {
     const toastId = toast.loading("Salvando dados...");
+    const peopleToSave = unsavedPeopleIds
+      .map((unsId) => {
+        const person = people?.find((person) => person.id === unsId);
+        return person ? { id: person.id, role: person.role } : null;
+      })
+      .filter(isTruthy);
     const result = await dispatch(
       saveProject({
         ...data,
@@ -107,13 +113,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
         startDate: data.startDate ?? undefined,
         finishDate: data.finishDate ?? undefined,
         title: data.title,
-        persons: unsavedPeopleIds
-          .map((unsId) => {
-            const person = people?.find((person) => person.id === unsId);
-            if (!person) return null;
-            return { id: person.id, role: person.role };
-          })
-          .filter(isTruthy),
+        persons: peopleToSave,
       })
     );
 
@@ -132,10 +132,13 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
   };
 
   const handleClose = () => {
+    props.onClose && props.onClose({} as SyntheticEvent, "backdropClick");
     reset(defaultValues);
     handleResetAddPersonMode();
     setPeople([]);
-    props.onClose && props.onClose({} as SyntheticEvent, "backdropClick");
+    setResults([]);
+    setUnsavedPeopleIds([]);
+    dispatch(resetResulstToSave());
   };
 
   useEffect(() => {
@@ -179,11 +182,29 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
 
   const dateIntervalError = errors.startDate?.message ?? errors.finishDate?.message ?? "";
 
+  const handleChangeRole = (id: Person["id"], newRole: RoleOption) => {
+    setPeople((peopleState) =>
+      peopleState?.map((person) => (person.id === id ? { ...person, role: newRole.role } : person))
+    );
+    if (!unsavedPeopleIds.includes(id)) setUnsavedPeopleIds((state) => [...state, id]);
+  };
+
+  const getTitle = () => {
+    if (!project) return "Adicionar";
+    if (project.isFinished) return "Dados do";
+    return "Editar";
+  };
+
   return (
     <>
       <Dialog maxWidth="xl" fullWidth {...props} onClose={handleClose}>
-        <DialogTitle className="text-primary">{project ? "Editar" : "Adicionar"} Projeto</DialogTitle>
+        <DialogTitle className="text-primary">{getTitle()} Projeto</DialogTitle>
         <DialogContent>
+          {project?.isFinished && (
+            <div className="text-gray-600 border-warning border-l-2 px-2 py-1">
+              ⚠️ Não é possível editar um projeto já finalizado!
+            </div>
+          )}
           <form
             id="projectsForm"
             onSubmit={handleSubmit(handleSave)}
@@ -197,11 +218,12 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                   <TextField
                     {...field}
                     fullWidth
+                    disabled={project?.isFinished}
                     className="max-w-sm"
                     label="Título*"
                     placeholder="Título do projeto"
-                    error={!!errors.description}
-                    helperText={errors.description?.message ?? ""}
+                    error={!!errors.title}
+                    helperText={errors.title?.message ?? ""}
                   />
                 )}
               />
@@ -212,12 +234,12 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                   <TextField
                     {...field}
                     fullWidth
+                    disabled={project?.isFinished}
                     multiline
                     className="max-w-5xl"
                     size="small"
-                    minRows={4}
-                    maxRows={9}
-                    label="Descrição"
+                    rows={6}
+                    label="Descrição*"
                     placeholder="Descreva aqui detalhes do seu projeto..."
                     error={!!errors.description}
                     helperText={errors.description?.message ?? ""}
@@ -232,6 +254,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                   <TextField
                     {...field}
                     fullWidth
+                    disabled={project?.isFinished}
                     className="max-w-xs"
                     label="Patrocinador"
                     placeholder="Financiador do projeto"
@@ -248,6 +271,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                 render={({ field }) => (
                   <DatePicker
                     {...field}
+                    disabled={project?.isFinished}
                     slotProps={{
                       textField: {
                         error: !!errors.startDate,
@@ -266,6 +290,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                 render={({ field }) => (
                   <DatePicker
                     {...field}
+                    disabled={project?.isFinished}
                     slotProps={{
                       textField: {
                         error: !!errors.finishDate,
@@ -308,7 +333,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                     )}
                     <Button
                       onClick={handleAddClick}
-                      disabled={isAddPersonMode && !personToAdd}
+                      disabled={project?.isFinished || (isAddPersonMode && !personToAdd)}
                       startIcon={isAddPersonMode ? <FiCheck /> : <FiPlus />}
                       variant={isAddPersonMode ? "contained" : "text"}
                     >
@@ -347,13 +372,8 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                       return (
                         <Autocomplete
                           value={roleOptions.find((r) => r.role === p.value)}
-                          onChange={(_e, newValue) =>
-                            setPeople((peopleState) =>
-                              peopleState?.map((person) =>
-                                person.id === p.row.id ? { ...person, role: newValue.role } : person
-                              )
-                            )
-                          }
+                          disabled={project?.isFinished}
+                          onChange={(_e, newValue) => handleChangeRole(p.row.id, newValue)}
                           disableClearable
                           isOptionEqualToValue={(option, value) => option.role === value.role}
                           options={roleOptions}
@@ -373,6 +393,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
             </TabPanel>
             <TabPanel value={currentOpenTab} index={1}>
               <ProjectResultsTab
+                disabledAdd={project?.isFinished}
                 project={{
                   people: people ?? [],
                   results,
@@ -382,13 +403,21 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
             </TabPanel>
           </Paper>
         </DialogContent>
-        <DialogActions>
-          <Button startIcon={<FiX />} color="primary" variant="outlined" onClick={handleClose}>
-            Cancelar
-          </Button>
-          <Button startIcon={<FiSave />} color="primary" variant="contained" type="submit" form="projectsForm">
-            Salvar
-          </Button>
+        <DialogActions className={project?.isFinished ? "justify-start" : ""}>
+          {!project?.isFinished ? (
+            <>
+              <Button startIcon={<FiX />} color="primary" variant="outlined" onClick={handleClose}>
+                Cancelar
+              </Button>
+              <Button startIcon={<FiSave />} color="primary" variant="contained" type="submit" form="projectsForm">
+                Salvar
+              </Button>
+            </>
+          ) : (
+            <Button startIcon={<FiChevronsLeft />} color="primary" variant="contained" onClick={handleClose}>
+              Voltar
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
     </>

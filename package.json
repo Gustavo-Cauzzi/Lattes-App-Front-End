@@ -29,6 +29,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.11.1",
     "sass": "^1.62.1",
+    "tailwind-merge": "^1.13.1",
     "uuidv4": "^6.2.13",
     "yup": "^1.2.0"
   },

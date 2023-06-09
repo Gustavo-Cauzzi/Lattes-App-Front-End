@@ -6,7 +6,7 @@ import { AppDispatch } from "../../shared/store/store";
 import { useDispatch } from "react-redux";
 import { logIn } from "../../shared/store/modules/auth/authSlice";
 import { v4 } from "uuid";
-import { useState } from "react";
+import { SyntheticEvent, useState } from "react";
 import { toast } from "react-hot-toast";
 
 export const FakeLogin: React.FC = () => {
@@ -14,7 +14,8 @@ export const FakeLogin: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const [name, setName] = useState("");
 
-  const handleEnter = async () => {
+  const handleSubmit = async (e: SyntheticEvent) => {
+    e.preventDefault();
     const toastId = toast.loading("Entrando...");
     await dispatch(logIn({ id: v4(), name }));
     toast.dismiss(toastId);
@@ -32,7 +33,10 @@ export const FakeLogin: React.FC = () => {
     >
       <DocSvg className="max-w-lg flex" />
 
-      <div className="bg-white rounded-xl shadow-xl flex p-8 gap-5 flex-col items-center min-w-[300px]">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white rounded-xl shadow-xl flex p-8 gap-5 flex-col items-center min-w-[300px]"
+      >
         <span className="text-4xl text-primary">
           <strong>Lattes</strong>Ucs
         </span>
@@ -44,10 +48,10 @@ export const FakeLogin: React.FC = () => {
           onChange={(e) => setName(e.target.value)}
         />
 
-        <Button variant="contained" onClick={handleEnter} className="text-xl">
+        <Button variant="contained" type="submit" className="text-xl">
           Entrar
         </Button>
-      </div>
+      </form>
     </main>
   );
 };

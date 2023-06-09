@@ -27,3 +27,18 @@ strong {
 body {
   background: #fafafa;
 }
+
+.nice-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #ccc;
+    border-radius: 3px;
+  }
+}
+
+.MuiInputBase-input {
+  @apply nice-scrollbar;
+}

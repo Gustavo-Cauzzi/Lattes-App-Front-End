@@ -1,9 +1,12 @@
 import { IconButton, darken, lighten, useTheme } from "@mui/material";
-import { FiBook, FiPower } from "react-icons/fi";
+import { FiBook, FiMenu, FiPower } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logOut } from "../../shared/store/modules/auth/authSlice";
 import { AppDispatch, RootState } from "../../shared/store/store";
+import { useState } from "react";
+import { Sidebar } from "./Sidebar";
+import { Logo } from "./Logo";
 
 interface GradientGeneratorConfig {
   lightCoefficient?: number;
@@ -25,23 +28,32 @@ export const Header = () => {
   const navigate = useNavigate();
   const dispatch: AppDispatch = useDispatch();
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const name = useSelector<RootState, string | undefined>((state) => state.auth.user?.name);
 
   const handleLogout = () => {
     dispatch(logOut());
   };
 
+  const handleOpenSidebar = () => {
+    setIsMenuOpen(true);
+  };
+
   return (
     <>
       <div
-        className="z-[1000] fixed w-full flex justify-between p-6 items-center shadow-xl text-white h-[5.62rem]"
+        className="z-[1000] fixed w-full flex justify-between p-6 pl-4 items-center shadow-xl text-white h-[5.62rem]"
         style={{
           background: generateGradient(theme.palette.primary.main),
         }}
       >
-        <strong className="flex gap-2 items-center text-2xl text-white cursor-pointer" onClick={() => navigate("/")}>
-          <FiBook size={29} /> Lattes Ucs
-        </strong>
+        <div className="flex gap-3 items-center">
+          <IconButton onClick={handleOpenSidebar}>
+            <FiMenu size={25} color="#fff" />
+          </IconButton>
+          <Logo onClick={() => navigate("/")} />
+        </div>
 
         <div className="flex gap-2 items-center">
           {name && <span>{name}</span>}
@@ -52,6 +64,8 @@ export const Header = () => {
         </div>
       </div>
       <div className="h-[5.62rem] header-overlay"></div>
+
+      <Sidebar open={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </>
   );
 };

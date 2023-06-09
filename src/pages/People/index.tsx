@@ -54,7 +54,7 @@ export const Pessoas: React.FC = () => {
               <span className="text-xl text-primary">Filtros</span>
             </AccordionSummary>
             <AccordionDetails>
-              <div className="flex justify-between">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 justify-between gap-4">
                 <TextField
                   label="E-mail"
                   value={filters.email}
@@ -178,12 +178,12 @@ const PersonDialogForm: React.FC<PersonDialogFormProps> = ({ person, ...props })
   return (
     <>
       <Dialog maxWidth="md" fullWidth {...props} onClose={handleClose}>
-        <DialogTitle>{person ? "Editar" : "Adicionar"} pessoa</DialogTitle>
+        <DialogTitle className="text-primary">{person ? "Editar" : "Adicionar"} pessoa</DialogTitle>
         <DialogContent>
           <form
             id="pessoasForm"
             onSubmit={handleSubmit(handleSavePessoa)}
-            className="flex w-full justify-center gap-4 py-4"
+            className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 w-full justify-center gap-4 py-4"
           >
             <Controller
               control={control}
@@ -201,6 +201,14 @@ const PersonDialogForm: React.FC<PersonDialogFormProps> = ({ person, ...props })
 
             <Controller
               control={control}
+              name="name"
+              render={({ field }) => (
+                <TextField {...field} label="Nome" error={!!errors.name} helperText={errors.name?.message ?? ""} />
+              )}
+            />
+
+            <Controller
+              control={control}
               name="institution"
               render={({ field }) => (
                 <TextField
@@ -209,14 +217,6 @@ const PersonDialogForm: React.FC<PersonDialogFormProps> = ({ person, ...props })
                   error={!!errors.institution}
                   helperText={errors.institution?.message ?? ""}
                 />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="name"
-              render={({ field }) => (
-                <TextField {...field} label="Nome" error={!!errors.name} helperText={errors.name?.message ?? ""} />
               )}
             />
           </form>

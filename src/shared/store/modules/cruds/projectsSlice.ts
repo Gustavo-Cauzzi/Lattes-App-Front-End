@@ -9,40 +9,42 @@ export const findAllProjects = createAsyncThunk("app/projects/findAllProjects", 
     return response.data;
 });
 
-export const changeProjectStatus = createAsyncThunk(
-    "app/project/changeProjectStatus",
-    async (id: Project["id"], { getState, rejectWithValue }) => {
-        const project = (getState() as RootState).projects.projects.find((project) => project.id === id);
-        if (!project) return rejectWithValue("Não foi possível encontrar o projeto");
-        return { ...project, isFinished: !project.isFinished };
-    }
-);
+export const deleteProjectsById = createAsyncThunk("app/projects/deleteProjectsById", async (ids: Project["id"][]) => {
+    // TODO: Delete projects
+    console.log("delete project by id, ids: ", ids);
+});
+
+export const changeProjectStatus = createAsyncThunk("app/project/changeProjectStatus", async (project: Project) => {
+    await api.put<Project>(`/projects/${project.id}`, {
+        isFinished: !project.isFinished,
+    });
+    return { ...project, isFinished: !project.isFinished };
+});
 
 type SaveProjectParams = Omit<Partial<Project>, "persons"> & { persons: { id: number; role: string }[] };
 export const saveProject = createAsyncThunk(
     "app/project/saveProject",
     async (payload: SaveProjectParams, { dispatch, getState, rejectWithValue }) => {
+        let project = null;
         if (payload.id) {
             const response = await api.put<Project>(`/projects/${payload.id}`, {
                 description: payload.description,
                 sponsor: payload.sponsor,
                 persons: payload.persons,
             });
-            dispatch(findAllProjects());
-            return response.data;
+            project = response.data;
+        } else {
+            const responseProject = await api.post<Project>("/projects", payload);
+            project = responseProject.data;
         }
-        const responseProject = await api.post<Project>("/projects", {
-            id: payload.id,
-            updated_at: new Date(),
-            ...payload,
-            ...(payload.id ? { created_at: new Date() } : {}),
-        });
 
-        const projectId = responseProject.data.id;
+        const projectId = project.id;
 
-        await api.put(`/projects/persons/${projectId}`, {
-            persons: payload.persons,
-        });
+        if (payload.persons.length) {
+            await api.put(`/projects/persons/${projectId}`, {
+                persons: payload.persons,
+            });
+        }
 
         const pendingResultsToSave = (getState() as RootState).projects.pendingResultsToSave;
         if (pendingResultsToSave.length) {
@@ -55,7 +57,7 @@ export const saveProject = createAsyncThunk(
             if (rejectedResponse) return rejectWithValue("Não foi possível salvar um dos resultados");
         }
         dispatch(findAllProjects());
-        return responseProject.data;
+        return project;
     }
 );
 
@@ -69,6 +71,9 @@ export const projectSlice = createSlice({
         addResultToSave(state, action: PayloadAction<BaseResultToSave>) {
             state.pendingResultsToSave.push(action.payload);
         },
+        resetResulstToSave(state) {
+            state.pendingResultsToSave = [];
+        },
     },
     extraReducers(builder) {
         builder.addCase(findAllProjects.fulfilled, (state, action) => {
@@ -76,7 +81,7 @@ export const projectSlice = createSlice({
         });
         builder.addCase(changeProjectStatus.fulfilled, (state, action) => {
             state.projects = state.projects.map((project) =>
-                project.id === action.meta.arg ? action.payload : project
+                project.id === action.meta.arg.id ? action.payload : project
             );
         });
         builder.addCase(saveProject.fulfilled, (state) => {
@@ -85,5 +90,5 @@ export const projectSlice = createSlice({
     },
 });
 
-export const { addResultToSave } = projectSlice.actions;
+export const { addResultToSave, resetResulstToSave } = projectSlice.actions;
 export default projectSlice.reducer;

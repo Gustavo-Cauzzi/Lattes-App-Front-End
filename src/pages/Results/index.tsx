@@ -1,6 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Button, TextField } from "@mui/material";
 import { DataGrid, GridExpandMoreIcon, GridRenderCellParams } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { FiPlus } from "react-icons/fi";
 import { useQuery } from "react-query";
@@ -22,6 +22,7 @@ export const Results: React.FC = () => {
   });
 
   const results = useSelector<RootState, Result[]>((state) => state.results.results);
+  const doubleUseEffectDebugController = useRef(false);
 
   const [filters, setFilters] = useState({
     description: "",
@@ -29,11 +30,18 @@ export const Results: React.FC = () => {
   });
 
   useEffect(() => {
+    if (doubleUseEffectDebugController.current) return;
+    console.log("aaa");
+    doubleUseEffectDebugController.current = true;
     const toastId = toast.loading("Buscando resultados...");
     dispatch(findAllResults())
       .unwrap()
       .catch(() => toast.error("Não foi possível buscar os dados"))
       .finally(() => toast.dismiss(toastId));
+
+    return () => {
+      doubleUseEffectDebugController.current = false;
+    };
   }, []);
 
   const updateFilter = (field: keyof typeof filters, value: (typeof filters)[typeof field]) => {
