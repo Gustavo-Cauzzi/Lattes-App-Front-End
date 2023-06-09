@@ -11,7 +11,13 @@ import {
   RadioGroup,
   TextField,
 } from "@mui/material";
-import { DataGrid, GridExpandMoreIcon, GridRenderCellParams, GridValueGetterParams } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridExpandMoreIcon,
+  GridPaginationModel,
+  GridRenderCellParams,
+  GridValueGetterParams,
+} from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers";
 import { isAfter, isBefore } from "date-fns";
 import { SyntheticEvent, useEffect, useState } from "react";
@@ -34,6 +40,7 @@ export const Projetos: React.FC = () => {
   const dispatch: AppDispatch = useDispatch();
   const [isProjectFormDialogOpen, setIsProjectFormDialogOpen] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState<Project>();
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ page: 0, pageSize: 10 });
 
   const projects = useSelector<RootState, Project[]>((state) => state.projects.projects);
 
@@ -203,6 +210,8 @@ export const Projetos: React.FC = () => {
                 ),
               },
             ]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
           />
 
           <div className="flex justify-end mt-4">
