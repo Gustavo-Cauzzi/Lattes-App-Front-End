@@ -1,9 +1,9 @@
 import { IconButton, darken, lighten, useTheme } from "@mui/material";
-import { FiPower } from "react-icons/fi";
+import { FiBook, FiPower } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { logOut } from "../../shared/store/modules/auth/authSlice";
 import { AppDispatch, RootState } from "../../shared/store/store";
-import { useNavigate } from "react-router-dom";
 
 interface GradientGeneratorConfig {
   lightCoefficient?: number;
@@ -39,8 +39,8 @@ export const Header = () => {
           background: generateGradient(theme.palette.primary.main),
         }}
       >
-        <strong className="text-2xl text-white cursor-pointer" onClick={() => navigate("/")}>
-          Lattes Ucs
+        <strong className="flex gap-2 items-center text-2xl text-white cursor-pointer" onClick={() => navigate("/")}>
+          <FiBook size={29} /> Lattes Ucs
         </strong>
 
         <div className="flex gap-2">

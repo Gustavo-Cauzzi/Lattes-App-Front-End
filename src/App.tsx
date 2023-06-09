@@ -6,6 +6,7 @@ import { Toaster } from "react-hot-toast";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { AppTheme } from "./routes/layers/AppTheme";
 
 const queryClient = new QueryClient();
 
@@ -14,8 +15,11 @@ export const App = () => {
     <QueryClientProvider client={queryClient}>
       <ReduxProvider store={store}>
         <LocalizationProvider adapterLocale={ptBR} dateAdapter={AdapterDateFns}>
-          <Toaster />
-          <AppRoutes />
+          <AppTheme>
+            <Toaster />
+
+            <AppRoutes />
+          </AppTheme>
         </LocalizationProvider>
       </ReduxProvider>
     </QueryClientProvider>

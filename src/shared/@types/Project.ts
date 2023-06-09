@@ -5,6 +5,7 @@ export type Roles = "coordinator" | "member";
 
 export interface Project {
     id: number;
+    title: string;
     description?: string;
     sponsor?: string;
 

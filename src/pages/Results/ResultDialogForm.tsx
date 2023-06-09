@@ -7,10 +7,11 @@ import {
   DialogProps,
   DialogTitle,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import { Result } from "../../shared/@types/Result";
 import { Controller, useForm } from "react-hook-form";
-import { object, string } from "yup";
+import { mixed, object, string } from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
@@ -22,13 +23,16 @@ import { toast } from "react-hot-toast";
 import { Project } from "../../shared/@types/Project";
 import { useDispatch } from "react-redux";
 import { saveResult } from "../../shared/store/modules/cruds/resultSlice";
+import { AppDispatch } from "../../shared/store/store";
+import { confirmationToast } from "../../shared/utils/Utils";
 
 interface ResultDialogFormProps extends DialogProps {
   result?: Result;
 }
 
 const schema = object({
-  description: string().required("Informação obrigatória"),
+  description: string().required("Informação uma descrição"),
+  project: mixed().required("Informe o projeto"),
 });
 
 interface DefaultValues {
@@ -42,22 +46,26 @@ const defaultValues: DefaultValues = {
 };
 
 export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClose, result }) => {
-  const dispatch = useDispatch();
+  const dispatch: AppDispatch = useDispatch();
   const [people, setPeople] = useState<Person[]>([]);
   const [personToAdd, setPersonToAdd] = useState<Person | null>(null);
   const [isAddPersonMode, setIsAddPersonMode] = useState(false);
-  const { data: peopleAutocompleteData } = useQuery("people", async () => {
-    const { data } = await api.get<Person[]>("/persons");
-    return data ?? [];
-  });
   const { data: projectsAutocompleteData } = useQuery("project", async () => {
     const { data } = await api.get<Project[]>("/projects");
     return data;
   });
-  const { reset, control, handleSubmit } = useForm({
+  const {
+    reset,
+    control,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm({
     defaultValues,
     resolver: yupResolver(schema),
   });
+
+  const wProject = watch("project");
 
   useEffect(() => {
     if (!result) {
@@ -72,8 +80,8 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
   }, [result]);
 
   const handleClose = () => {
-    reset(defaultValues);
     onClose && onClose({} as SyntheticEvent, "escapeKeyDown");
+    reset(defaultValues);
   };
 
   const handleSaveResult = async (data: DefaultValues) => {
@@ -81,15 +89,22 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
       toast("Informe todos os dados necessários");
       return;
     }
+    if (
+      !people.length &&
+      !(await confirmationToast("Tem certeza que quer salvar o resultado sem nenhuma pessoa atrelada a ele?"))
+    ) {
+      return;
+    }
     const toastId = toast.loading("Carregando dados ");
     const dispatchResult = await dispatch(
-      saveResult({ persons: [] as Person[], description: data.description, id: result.id, project: data.project })
+      saveResult({ persons: people, description: data.description, id: result?.id, project: data.project })
     );
 
     if (saveResult.rejected.match(dispatchResult)) {
       toast.error("Não foi possível salvar o registro");
     } else {
       toast.success("Registro salvo com sucesso!");
+      handleClose();
     }
 
     toast.dismiss(toastId);
@@ -123,12 +138,18 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
       <DialogContent>
         <form onSubmit={handleSubmit(handleSaveResult)} id="resultsForm">
           <div className="flex flex-col gap-10">
-            <div className="flex justify-between pt-3">
+            <div className="flex justify-between pt-3 flex-col gap-4 xssm:flex-row">
               <Controller
                 control={control}
                 name="description"
                 render={({ field }) => (
-                  <TextField {...field} label="Descrição" placeholder="Projeto sobre técnologia" />
+                  <TextField
+                    {...field}
+                    label="Descrição"
+                    placeholder="Software do projeto"
+                    error={!!errors.description}
+                    helperText={errors.description?.message ?? ""}
+                  />
                 )}
               />
 
@@ -140,10 +161,22 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
                     options={projectsAutocompleteData ?? []}
                     value={field.value}
                     fullWidth
-                    className="max-w-xs"
-                    onChange={(_e, newValue) => field.onChange(newValue)}
-                    renderInput={(params) => <TextField {...params} label="Projeto" />}
-                    getOptionLabel={(project) => project.description ?? "Não identificado"}
+                    className="xssm:max-w-xs"
+                    onChange={(_e, newValue) => {
+                      if (personToAdd) setPersonToAdd(null);
+                      if (!newValue && isAddPersonMode) setIsAddPersonMode(false);
+                      field.onChange(newValue);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Projeto"
+                        fullWidth
+                        error={!!errors.project}
+                        helperText={errors.project?.message ?? ""}
+                      />
+                    )}
+                    getOptionLabel={(project) => project.title ?? "Não identificado"}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                   />
                 )}
@@ -151,41 +184,58 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
             </div>
 
             <div className="flex flex-col gap-2">
-              <div className="mt-10 mb-2 flex w-full gap-4 justify-between items-center">
+              <div className="mt-10 mb-2 flex w-full gap-4 justify-between items-center flex-col xs:flex-row">
                 <h2 className="text-primary text-xl whitespace-nowrap">Pessoas do projeto</h2>
 
-                <div className="pt-2 flex gap-2 w-full max-w-sm justify-end overflow-hidden">
-                  {isAddPersonMode ? (
-                    <Button startIcon={<FiX />} onClick={handleResetAddPersonMode}>
-                      Cancelar
-                    </Button>
-                  ) : (
-                    // <Button startIcon={<FiTrash2 />} onClick={handleRemovePeople} disabled={!selectedPeopleIds.length}>
-                    //   Remover
-                    // </Button>
-                    <></>
-                  )}
-                  <Button
-                    onClick={handleAddClick}
-                    disabled={isAddPersonMode && !personToAdd}
-                    startIcon={isAddPersonMode ? <FiCheck /> : <FiPlus />}
-                    variant={isAddPersonMode ? "contained" : "text"}
-                  >
-                    Adicionar
-                  </Button>
+                <div className="pt-2 w-fit flex gap-2 max-w-sm justify-end overflow-hidden flex-col smmd:flex-row">
+                  <div className="flex gap-2 justify-between items-center">
+                    {isAddPersonMode && (
+                      <Button startIcon={<FiX />} onClick={handleResetAddPersonMode}>
+                        Cancelar
+                      </Button>
+                    )}
+                    <Tooltip
+                      title={!wProject ? "Selecione um projeto para adicionar pessoas" : ""}
+                      arrow
+                      placement="top"
+                    >
+                      <div>
+                        <Button
+                          onClick={handleAddClick}
+                          disabled={!wProject || (isAddPersonMode && !personToAdd)}
+                          startIcon={isAddPersonMode ? <FiCheck /> : <FiPlus />}
+                          variant={isAddPersonMode ? "contained" : "text"}
+                        >
+                          Adicionar
+                        </Button>
+                      </div>
+                    </Tooltip>
+                  </div>
 
                   <Autocomplete
                     value={personToAdd}
                     onChange={(_e, newValue) => setPersonToAdd(newValue)}
                     fullWidth
-                    className={`max-w-[10rem] ${isAddPersonMode ? "" : "mr-[-10rem]"} transition-all`}
+                    className={`smmd:min-w-[10rem] ${
+                      isAddPersonMode ? "" : "hidden xssm:block mr-[-10rem]"
+                    } transition-all`}
                     options={
-                      peopleAutocompleteData?.filter(
+                      wProject?.persons?.filter(
                         (personOption) => !people?.find((person) => person.id === personOption.id)
                       ) ?? []
                     }
+                    noOptionsText={
+                      wProject?.persons?.length ? "Nenhum resultado" : "Nenhuma pessoa cadastrada no projeto"
+                    }
                     getOptionLabel={(option) => `${option.id} - ${option.name}`}
-                    renderInput={(params) => <TextField {...params} size="small" label="Pessoa" />}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        size="small"
+                        label="Pessoa"
+                        inputProps={{ tabIndex: isAddPersonMode ? 0 : -1, ...params.inputProps }}
+                      />
+                    )}
                   />
                 </div>
               </div>
@@ -200,13 +250,24 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
           </div>
         </form>
       </DialogContent>
-      <DialogActions>
+      <DialogActions className="gap-3">
         <Button startIcon={<FiX />} color="primary" variant="outlined" onClick={handleClose}>
           Cancelar
         </Button>
-        <Button startIcon={<FiSave />} color="primary" variant="contained" type="submit" form="resultsForm">
-          Salvar
-        </Button>
+        <Tooltip title={!!result ? "🚧 Modificação de resultado não implementada" : ""}>
+          <div>
+            <Button
+              startIcon={<FiSave />}
+              color="primary"
+              variant="contained"
+              type="submit"
+              form="resultsForm"
+              disabled={!!result}
+            >
+              Salvar
+            </Button>
+          </div>
+        </Tooltip>
       </DialogActions>
     </Dialog>
   );

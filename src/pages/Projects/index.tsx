@@ -100,10 +100,7 @@ export const Projetos: React.FC = () => {
                   <RadioGroup
                     row
                     value={filters.isFinished}
-                    onChange={(_e, value) => {
-                      console.log("value: ", value);
-                      updateFilter("isFinished", value);
-                    }}
+                    onChange={(_e, value) => updateFilter("isFinished", value)}
                   >
                     <FormControlLabel value={statusFilter.all} control={<Radio />} label="Todos" />
                     <FormControlLabel value={statusFilter.onGoing} control={<Radio />} label="Em andamento" />
@@ -165,6 +162,11 @@ export const Projetos: React.FC = () => {
             onRowClick={(p) => setProjectToEdit(p.row)}
             disableRowSelectionOnClick
             columns={[
+              {
+                field: "title",
+                headerName: "Título",
+                flex: 1,
+              },
               {
                 field: "description",
                 headerName: "Descrição",

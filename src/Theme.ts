@@ -28,15 +28,20 @@ export const theme = createTheme({
             styleOverrides: {
                 root: {
                     textTransform: "capitalize",
-                    borderRadius: 15,
+                    borderRadius: 10,
                 },
+            },
+        },
+        MuiTooltip: {
+            defaultProps: {
+                placement: "top",
+                arrow: true,
             },
         },
         MuiAccordion: {
             styleOverrides: {
                 gutters: {
                     borderRadius: 20,
-
                     borderTopLeftRadius: "20px !important",
                     borderTopRightRadius: "20px !important",
                 },
