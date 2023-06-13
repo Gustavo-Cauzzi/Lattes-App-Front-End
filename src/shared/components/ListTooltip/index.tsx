@@ -1,14 +1,21 @@
 import { capitalize } from "@mui/material";
 import { LightTooltip } from "../MuiUtils/LightTooltip";
+import { PropsWithChildren } from "react";
 
-interface ListCellRenderProps {
+interface ListTooltipProps {
   list: string[];
   noOptionsText?: string;
   subject?: string;
   feminine?: boolean;
 }
 
-export const ListCellRender: React.FC<ListCellRenderProps> = ({ list, noOptionsText, subject = "item", feminine }) => {
+export const ListTooltip: React.FC<PropsWithChildren<ListTooltipProps>> = ({
+  list,
+  noOptionsText,
+  subject = "item",
+  feminine,
+  children,
+}) => {
   return (
     <LightTooltip
       title={
@@ -28,7 +35,7 @@ export const ListCellRender: React.FC<ListCellRenderProps> = ({ list, noOptionsT
         </div>
       }
     >
-      <span className="w-full text-center">{list.length ?? 0}</span>
+      {children ? <>{children}</> : <span className="w-full text-center">{list.length ?? 0}</span>}
     </LightTooltip>
   );
 };

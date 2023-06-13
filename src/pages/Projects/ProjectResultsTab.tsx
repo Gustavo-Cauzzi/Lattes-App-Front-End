@@ -5,7 +5,7 @@ import { FiPlus } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { Person } from "../../shared/@types/Person";
 import { Result } from "../../shared/@types/Result";
-import { ListCellRender } from "../../shared/components/ListCellRender";
+import { ListTooltip } from "../../shared/components/ListTooltip";
 import { api } from "../../shared/services/api";
 import { addResultToSave } from "../../shared/store/modules/cruds/projectsSlice";
 import { BaseResultToSave } from "../../shared/store/modules/cruds/resultSlice";
@@ -31,7 +31,7 @@ const columns: GridColDef[] = [
     headerName: "Pessoas",
     flex: 1,
     renderCell: (p: GridRenderCellParams<SimpleResult, Person[]>) => (
-      <ListCellRender feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
+      <ListTooltip feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
     ),
   },
 ];

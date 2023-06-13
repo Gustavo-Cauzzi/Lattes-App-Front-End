@@ -28,7 +28,7 @@ import toast from "react-hot-toast";
 import { FiInfo, FiPackage, FiPlus, FiTrash2, FiUser } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
 import { Project } from "../../shared/@types/Project";
-import { ListCellRender } from "../../shared/components/ListCellRender";
+import { ListTooltip } from "../../shared/components/ListTooltip";
 import { LightTooltip } from "../../shared/components/MuiUtils/LightTooltip";
 import {
   changeProjectStatus,
@@ -93,7 +93,7 @@ const generateColumns = (handleUpdateStatus: (e: SyntheticEvent, project: Projec
     sortable: false,
     renderHeader: () => <FiUser />,
     renderCell: (p: GridRenderCellParams<Project, null>) => (
-      <ListCellRender feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
+      <ListTooltip feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
     ),
   },
   {
@@ -104,7 +104,7 @@ const generateColumns = (handleUpdateStatus: (e: SyntheticEvent, project: Projec
     sortable: false,
     renderHeader: () => <FiPackage />,
     renderCell: (p: GridRenderCellParams<Project, null>) => (
-      <ListCellRender list={p.row.results.map((r) => r.description) ?? []} subject="resultado" />
+      <ListTooltip list={p.row.results.map((r) => r.description) ?? []} subject="resultado" />
     ),
   },
   {
