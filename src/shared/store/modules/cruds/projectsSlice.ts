@@ -28,6 +28,9 @@ export const saveProject = createAsyncThunk(
         let project = null;
         if (payload.id) {
             const response = await api.put<Project>(`/projects/${payload.id}`, {
+                title: payload.title,
+                finishDate: payload.finishDate,
+                startDate: payload.startDate,
                 description: payload.description,
                 sponsor: payload.sponsor,
                 persons: payload.persons,
