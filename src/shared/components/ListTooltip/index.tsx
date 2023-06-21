@@ -35,7 +35,7 @@ export const ListTooltip: React.FC<PropsWithChildren<ListTooltipProps>> = ({
         </div>
       }
     >
-      {children ? <>{children}</> : <span className="w-full text-center">{list.length ?? 0}</span>}
+      {children ? <div>{children}</div> : <span className="w-full text-center">{list.length ?? 0}</span>}
     </LightTooltip>
   );
 };

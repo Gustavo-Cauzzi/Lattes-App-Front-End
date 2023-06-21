@@ -19,7 +19,7 @@ import { format } from "date-fns";
 import { SyntheticEvent, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { FiCheck, FiChevronsLeft, FiPlus, FiSave, FiX } from "react-icons/fi";
+import { FiCheck, FiChevronsLeft, FiPlus, FiSave, FiTrash2, FiX } from "react-icons/fi";
 import { useQuery } from "react-query";
 import { useDispatch } from "react-redux";
 import { date, object, ref, string } from "yup";
@@ -28,7 +28,11 @@ import { Project, Roles } from "../../shared/@types/Project";
 import { Result } from "../../shared/@types/Result";
 import { TabPanel } from "../../shared/components/MuiUtils/TabPanel";
 import { api } from "../../shared/services/api";
-import { resetResulstToSave, saveProject } from "../../shared/store/modules/cruds/projectsSlice";
+import {
+  deletePeopleFromProject,
+  resetResulstToSave,
+  saveProject,
+} from "../../shared/store/modules/cruds/projectsSlice";
 import { AppDispatch } from "../../shared/store/store";
 import { IfPresent, isTruthy } from "../../shared/utils/Utils";
 import { ProjectResultsTab } from "./ProjectResultsTab";
@@ -75,7 +79,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
   // Results list
   const [results, setResults] = useState<Result[]>([]);
   // Seleção pendente da implementação de deleção de registros no backend
-  const [_selectedPeopleIds, setSelectedPeopleIds] = useState<Person["id"][]>([]);
+  const [selectedPeopleIds, setSelectedPeopleIds] = useState<Person["id"][]>([]);
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({ pageSize: 10, page: 0 });
 
   const [unsavedPeopleIds, setUnsavedPeopleIds] = useState<Person["id"][]>([]);
@@ -189,6 +193,41 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
     if (!unsavedPeopleIds.includes(id)) setUnsavedPeopleIds((state) => [...state, id]);
   };
 
+  const handleRemovePeople = async () => {
+    if (!people) {
+      // Yeah, we're screwed, cuz something is very very wrong
+      toast.error("Erro 29584 - Pessoas não localizadas");
+      return;
+    }
+
+    const updateList = () => {
+      toast.success("Registros excluidos com sucesso!");
+      setPeople((state) => state?.filter((p) => !selectedPeopleIds.includes(p.id)));
+    };
+
+    if (!project) {
+      updateList();
+      return;
+    }
+    // const { idsToDeleteDb, idsToDeleteState } = people.reduce(
+    //   (acc, curr) => ({
+    //     idsToDeleteDb: [...acc.idsToDEleteDb, ids], idsToDeleteState: []
+    //   }),
+    //   { idsToDeleteDb: [], idsToDeleteState: [] }
+    // );
+    const idsToDelete = selectedPeopleIds.filter((id) => id >= 0);
+
+    const toastId = toast.loading("Carregando dados ");
+    const result = await dispatch(deletePeopleFromProject({ personsIds: idsToDelete, projectId: project?.id }));
+
+    if (deletePeopleFromProject.rejected.match(result)) {
+      toast.error("Não foi possível excluir os registros");
+    } else {
+      updateList();
+    }
+    toast.dismiss(toastId);
+  };
+
   const getTitle = () => {
     if (!project) return "Adicionar";
     if (project.isFinished) return "Dados do";
@@ -219,7 +258,7 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                     {...field}
                     fullWidth
                     disabled={project?.isFinished}
-                    className="max-w-sm"
+                    className="max-w-5xl"
                     label="Título*"
                     placeholder="Título do projeto"
                     error={!!errors.title}
@@ -326,10 +365,13 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                         Cancelar
                       </Button>
                     ) : (
-                      // <Button startIcon={<FiTrash2 />} onClick={handleRemovePeople} disabled={!selectedPeopleIds.length}>
-                      //   Remover
-                      // </Button>
-                      <></>
+                      <Button
+                        startIcon={<FiTrash2 />}
+                        onClick={handleRemovePeople}
+                        disabled={!selectedPeopleIds.length}
+                      >
+                        Remover
+                      </Button>
                     )}
                     <Button
                       onClick={handleAddClick}
@@ -385,7 +427,8 @@ export const ProjectDialogForm: React.FC<ProjectDialogFormProps> = ({ project, .
                     },
                   },
                 ]}
-                // checkboxSelection
+                checkboxSelection
+                rowSelectionModel={selectedPeopleIds}
                 onRowSelectionModelChange={(newSelectionModel) => setSelectedPeopleIds(newSelectionModel as number[])}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}

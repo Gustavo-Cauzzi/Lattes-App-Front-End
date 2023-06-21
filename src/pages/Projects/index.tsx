@@ -187,18 +187,6 @@ export const Projetos: React.FC = () => {
     )
       return;
 
-    const allResultIdsToDelete = projectsToDelete
-      .map((project) => project.results?.map((result) => result.id) ?? [])
-      .flat();
-    const toastResultsId = toast.loading("Excluindo os resultados...");
-    const resultDelete = await dispatch(deleteResultsById(allResultIdsToDelete));
-
-    toast.dismiss(toastResultsId);
-    if (isRejected(resultDelete)) {
-      toast.error("Não foi possível excluir os resultados");
-      return;
-    }
-
     const toastProjectDeletionId = toast.loading("Excluindo os projetos...");
     const projectDeletionResult = await dispatch(deleteProjectsById(rowSelectionModel));
 
@@ -209,7 +197,6 @@ export const Projetos: React.FC = () => {
       setRowSelectionModel([]);
     }
     toast.dismiss(toastProjectDeletionId);
-    toast("(Não implmentado)");
   };
 
   return (

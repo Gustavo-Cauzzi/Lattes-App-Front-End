@@ -59,6 +59,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
     const { data } = await api.get<Project[]>("/projects");
     return data;
   });
+
   const {
     reset,
     control,
@@ -104,7 +105,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
   }, [fixedProject]);
 
   const handleClose = () => {
-    onClose && onClose({} as SyntheticEvent, "escapeKeyDown");
+    if (onClose) onClose({} as SyntheticEvent, "escapeKeyDown");
     setIsAddPersonMode(false);
     setPersonToAdd(null);
     reset(defaultValues);
@@ -193,7 +194,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
                 name="project"
                 render={({ field }) => (
                   <Autocomplete
-                    disabled={!!fixedProject}
+                    disabled={!!(fixedProject ?? result?.id)}
                     options={withFixedProject(projectsAutocompleteData ?? [])}
                     value={field.value}
                     fullWidth
@@ -261,7 +262,7 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
                       ) ?? []
                     }
                     noOptionsText={
-                      wProject?.persons?.length ? "Nenhum resultado" : "Nenhuma pessoa cadastrada no projeto"
+                      wProject?.persons?.length ? "Nenhum registro encontrado" : "Nenhuma pessoa cadastrada no projeto"
                     }
                     getOptionLabel={(option) => `${option.id} - ${option.name}`}
                     renderInput={(params) => (
@@ -290,20 +291,9 @@ export const ResultDialogForm: React.FC<ResultDialogFormProps> = ({ open, onClos
         <Button startIcon={<FiX />} color="primary" variant="outlined" onClick={handleClose}>
           Cancelar
         </Button>
-        <Tooltip title={!!result ? "🚧 Modificação de resultado não implementada" : ""}>
-          <div>
-            <Button
-              startIcon={<FiSave />}
-              color="primary"
-              variant="contained"
-              type="submit"
-              form="resultsForm"
-              disabled={!!result}
-            >
-              Salvar
-            </Button>
-          </div>
-        </Tooltip>
+        <Button startIcon={<FiSave />} color="primary" variant="contained" type="submit" form="resultsForm">
+          Salvar
+        </Button>
       </DialogActions>
     </Dialog>
   );

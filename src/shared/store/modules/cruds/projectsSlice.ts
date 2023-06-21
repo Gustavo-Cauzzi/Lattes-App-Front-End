@@ -9,10 +9,25 @@ export const findAllProjects = createAsyncThunk("app/projects/findAllProjects", 
     return response.data;
 });
 
-export const deleteProjectsById = createAsyncThunk("app/projects/deleteProjectsById", async (ids: Project["id"][]) => {
-    // TODO: Delete projects
-    console.log("delete project by id, ids: ", ids);
-});
+interface DeletePeopleFromProject {
+    projectId: number;
+    personsIds: number[];
+}
+
+export const deletePeopleFromProject = createAsyncThunk(
+    "app/projects/deleteProjectsById",
+    async ({ projectId, personsIds }: DeletePeopleFromProject) => {
+        await api.delete(`/projects/persons/${projectId}`, { data: { personsIds } });
+    }
+);
+
+export const deleteProjectsById = createAsyncThunk(
+    "app/projects/deleteProjectsById",
+    async (ids: Project["id"][], { dispatch }) => {
+        await Promise.all(ids.map((id) => api.delete(`/projects/${id}`)));
+        dispatch(findAllProjects());
+    }
+);
 
 export const changeProjectStatus = createAsyncThunk("app/project/changeProjectStatus", async (project: Project) => {
     await api.put<Project>(`/projects/${project.id}`, {
@@ -79,6 +94,16 @@ export const projectSlice = createSlice({
         },
     },
     extraReducers(builder) {
+        builder.addCase(deletePeopleFromProject.fulfilled, (state, action) => {
+            state.projects = state.projects.map((project) =>
+                project.id === action.meta.arg.projectId
+                    ? {
+                          ...project,
+                          persons: project.persons?.filter((person) => !action.meta.arg.personsIds.includes(person.id)),
+                      }
+                    : project
+            );
+        });
         builder.addCase(findAllProjects.fulfilled, (state, action) => {
             state.projects = action.payload;
         });

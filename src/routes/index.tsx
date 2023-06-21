@@ -5,6 +5,7 @@ import { Projetos } from "../pages/Projects";
 import { Results } from "../pages/Results";
 import { Auth } from "./layers/Auth";
 import { BaseLayout } from "./layouts/BaseLayout";
+import { NotFoundRoute } from "./layouts/NotFoundRoute";
 
 export const AppRoutes = () => (
   <BrowserRouter>
@@ -15,6 +16,7 @@ export const AppRoutes = () => (
           <Route path="/person" element={<Pessoas />} />
           <Route path="/projects" element={<Projetos />} />
           <Route path="/results" element={<Results />} />
+          <Route path="/*" element={<NotFoundRoute />} />
         </Route>
       </Routes>
     </Auth>

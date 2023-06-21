@@ -1,6 +1,6 @@
 import { Accordion, AccordionDetails, AccordionSummary, Autocomplete, Button, TextField } from "@mui/material";
 import { DataGrid, GridExpandMoreIcon, GridRenderCellParams } from "@mui/x-data-grid";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiPlus } from "react-icons/fi";
 import { useQuery } from "react-query";
@@ -20,9 +20,9 @@ export const Results: React.FC = () => {
     const { data } = await api.get<Project[]>("/projects");
     return data;
   });
+  const [selectionModel, setSelectionModel] = useState<Result["id"][]>([]);
 
   const results = useSelector<RootState, Result[]>((state) => state.results.results);
-  const doubleUseEffectDebugController = useRef(false);
 
   const [filters, setFilters] = useState({
     description: "",
@@ -30,18 +30,11 @@ export const Results: React.FC = () => {
   });
 
   useEffect(() => {
-    if (doubleUseEffectDebugController.current) return;
-    console.log("aaa");
-    doubleUseEffectDebugController.current = true;
     const toastId = toast.loading("Buscando resultados...");
     dispatch(findAllResults())
       .unwrap()
       .catch(() => toast.error("Não foi possível buscar os dados"))
       .finally(() => toast.dismiss(toastId));
-
-    return () => {
-      doubleUseEffectDebugController.current = false;
-    };
   }, []);
 
   const updateFilter = (field: keyof typeof filters, value: (typeof filters)[typeof field]) => {
@@ -87,6 +80,8 @@ export const Results: React.FC = () => {
                   !row.project ||
                   filters.project.find((p) => p.id === row.project?.id))
             )}
+            rowSelectionModel={selectionModel}
+            onRowSelectionModelChange={(newSelectionModel) => setSelectionModel(newSelectionModel as Result["id"][])}
             onRowClick={(p) => setResultToEdit(p.row)}
             disableRowSelectionOnClick
             columns={[
@@ -105,7 +100,7 @@ export const Results: React.FC = () => {
             ]}
           />
 
-          <div className="flex justify-end mt-4">
+          <div className="flex justify-end mt-4 gap-4">
             <Button startIcon={<FiPlus />} variant="contained" onClick={() => setIsResultFormDialogOpen(true)}>
               Adicionar
             </Button>

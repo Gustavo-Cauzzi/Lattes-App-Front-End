@@ -31,7 +31,9 @@ const columns: GridColDef[] = [
     headerName: "Pessoas",
     flex: 1,
     renderCell: (p: GridRenderCellParams<SimpleResult, Person[]>) => (
-      <ListTooltip feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
+      <div>
+        <ListTooltip feminine list={p.row.persons?.map((p) => p.name ?? "Não reconhecido") ?? []} subject="pessoa" />
+      </div>
     ),
   },
 ];
@@ -57,12 +59,15 @@ export const ProjectResultsTab: React.FC<ProjectResultsTabProps> = ({ project, d
         )
       ).map((response) => response.data);
 
+      console.log("project: ", project);
+      console.log("resultsToSave, fullResultsInfo: ", resultsToSave, fullResultsInfo);
+
       setResults([...fullResultsInfo, ...resultsToSave.map((r) => ({ ...r, id: negativeIncremental-- }))]);
       setIsLoading(false);
     };
 
     getData();
-  }, []);
+  }, [project]);
 
   const handleNewResultsSave = async (resultToSave: BaseResultToSave) => {
     setResults((state) => [

@@ -8,16 +8,23 @@ export const findAllResults = createAsyncThunk("app/results/findAllResults", asy
     return response.data;
 });
 
-export const deleteResultsById = createAsyncThunk("app/results/deleteResultsById", async (ids: Result["id"][]) => {
-    // TODO: Deletar os resutlados
-    console.log("deleteResultsById: ", ids);
-});
+export const deleteResultsById = createAsyncThunk(
+    "app/results/deleteResultsById",
+    async (ids: Result["id"][], { dispatch }) => {
+        await Promise.all(ids.map((id) => api.delete(`/results/${id}`)));
+        dispatch(findAllResults());
+    }
+);
 
 export type BaseResultToSave = Omit<Result, "id" | "project"> & { id?: Result["id"]; projectId: Project["id"] };
 export const saveResult = createAsyncThunk("app/result/saveResult", async (payload: BaseResultToSave, { dispatch }) => {
     if (payload.id) {
-        // TODO: PUT de result quando for feito
-        return [];
+        const response = await api.put<Result>(`/results/${payload.id}`, {
+            description: payload.description,
+            members: payload.persons?.map((person) => person.id) ?? [],
+        });
+        dispatch(findAllResults());
+        return response.data;
     }
     const response = await api.post<Result>("/results", {
         description: payload.description,
