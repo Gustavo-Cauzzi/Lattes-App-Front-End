@@ -8,7 +8,7 @@ export const Logo: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({ className
       className={twMerge(`flex gap-2 items-center text-2xl text-white cursor-pointer ${className ?? ""}`)}
       {...props}
     >
-      <FiBook size={29} /> Lattes Ucs
+      <FiBook size={29} /> UCS Paper
     </strong>
   );
 };

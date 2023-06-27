@@ -38,7 +38,7 @@ export const FakeLogin: React.FC = () => {
         className="bg-white rounded-xl shadow-xl flex p-8 gap-5 flex-col items-center min-w-[300px]"
       >
         <span className="text-4xl text-primary">
-          <strong>Lattes</strong>Ucs
+          <strong>Ucs</strong> Paper
         </span>
 
         <TextField
