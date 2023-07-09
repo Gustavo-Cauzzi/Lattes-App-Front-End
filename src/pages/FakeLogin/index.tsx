@@ -31,7 +31,12 @@ export const FakeLogin: React.FC = () => {
         }),
       }}
     >
-      <DocSvg className="max-w-lg flex" />
+      {/* <DocSvg className="max-w-lg flex" /> */}
+      <img
+        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdyasZt76noGWydrt6orZTgjo95emhbkOeHKf5pvf8QkGwL4Ht2h1_cJaOPdjRrVCrLzE&usqp=CAU"
+        className="hehe"
+        alt=""
+      />
 
       <form
         onSubmit={handleSubmit}
